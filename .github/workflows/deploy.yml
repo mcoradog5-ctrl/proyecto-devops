@@ -1,0 +1,31 @@
+name: Deploy API to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to AWS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            if [ ! -d "proyecto-devops" ]; then
+              git clone https://github.com/mcoradog5-ctrl/proyecto-devops.git
+            fi
+            cd proyecto-devops
+            git pull origin main
+            docker stop api-contenedor || true
+            docker rm api-contenedor || true
+            docker build -t mi-api-devops:v1 .
+            docker run -d --name api-contenedor -p 80:3000 mi-api-devops:v1
