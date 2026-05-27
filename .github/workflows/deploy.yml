@@ -25,17 +25,17 @@ jobs:
             fi
             cd proyecto-devops
             
-            # 1. Forzamos a Git a traer lo limpio de GitHub
+            # 1. Limpiamos cualquier conflicto de Git local en AWS
             git fetch origin main
             git reset --hard origin/main
             
-            # 2. SI FALTA DOCKER COMPOSE EN AWS, SE INSTALA AUTOMÁTICAMENTE
+            # 2. Auto-instalar Docker Compose en AWS si hace falta
             if ! docker compose version >/dev/null 2>&1 && ! command -v docker-compose >/dev/null 2>&1; then
-              echo "Instalando Docker Compose en el servidor de AWS..."
+              echo "Instalando Docker Compose en el servidor..."
               sudo apt-get update && sudo apt-get install -y docker-compose-plugin
             fi
             
-            # 3. Levantamos toda la arquitectura multi-contenedor
+            # 3. Levantar la arquitectura multi-contenedor
             if docker compose version >/dev/null 2>&1; then
               echo "Corriendo con Docker Compose V2"
               docker compose down || true
