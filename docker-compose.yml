@@ -2,7 +2,7 @@ version: '3.8'
 
 networks:
   umg-vnet:
-    driver: bridge
+    driver: overlay
 
 volumes:
   mongo-db-data:
@@ -21,30 +21,41 @@ services:
       - umg-vnet
     depends_on:
       - api-service
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # Servidor de Aplicación (Tu API de Node)
+  # Servidor de Aplicación
   api-service:
     build: .
+    image: proyecto-devops-api-service:latest
     container_name: api-app
-    restart: always
     environment:
       - MONGO_URI=mongodb://db-service:27017/umgdb
     networks:
       - umg-vnet
     depends_on:
       - db-service
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
 
   # Base de Datos
   db-service:
     image: mongo:latest
     container_name: database-mongo
-    restart: always
     volumes:
       - mongo-db-data:/data/db
     networks:
       - umg-vnet
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # Monitoreo (Puntos Extra y Requisito)
+  # Monitoreo
   grafana:
     image: grafana/grafana:latest
     container_name: grafana-dashboard
@@ -54,3 +65,7 @@ services:
       - grafana-metrics:/var/lib/grafana
     networks:
       - umg-vnet
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure

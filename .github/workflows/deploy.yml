@@ -22,24 +22,23 @@ jobs:
             cd proyecto-devops
             git fetch origin main
             git reset --hard origin/main
+
+            # Instalar Docker Compose si no existe
             if ! docker compose version >/dev/null 2>&1 && ! command -v docker-compose >/dev/null 2>&1; then
-              echo "Descargando Docker Compose directamente de GitHub..."
               sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
               sudo chmod +x /usr/local/bin/docker-compose
             fi
+
+            # Inicializar Swarm si no está activo
+            docker info | grep -q "Swarm: active" || docker swarm init
+
+            # Liberar puerto 80
             docker ps --filter "publish=80" -q | xargs -r docker stop || true
             docker ps -a --filter "publish=80" -q | xargs -r docker rm  || true
-            if docker compose version >/dev/null 2>&1; then
-              echo "Corriendo con Docker Compose V2 (Plugin)"
-              docker compose down || true
-              docker compose up -d --build
-            elif command -v docker-compose >/dev/null 2>&1; then
-              echo "Corriendo con Docker Compose V2 (Standalone)"
-              docker-compose down || true
-              docker-compose up -d --build
-            else
-              echo "Error crítico: No se pudo instalar Docker Compose."
-              exit 1
-            fi
 
+            # Construir imagen antes del deploy
+            docker build -t proyecto-devops-api-service:latest .
+
+            # Desplegar o actualizar el stack con Swarm
+            docker stack deploy -c docker-compose.yml proyecto-devops
     
