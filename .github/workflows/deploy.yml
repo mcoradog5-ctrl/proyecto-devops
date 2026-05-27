@@ -1,16 +1,14 @@
-name: Deploy API to AWS EC2
+name: Deploy Proyecto DevOps
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout del codigo
         uses: actions/checkout@v4
 
       - name: Deploy to AWS via SSH
@@ -25,7 +23,6 @@ jobs:
             fi
             cd proyecto-devops
             git pull origin main
-            docker stop api-contenedor || true
-            docker rm api-contenedor || true
-            docker build -t mi-api-devops:v1 .
-            docker run -d --name api-contenedor -p 80:3000 mi-api-devops:v1
+            # Apaga los contenedores viejos y levanta la nueva arquitectura
+            docker compose down || true
+            docker compose up -d --build
