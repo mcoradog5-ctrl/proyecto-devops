@@ -22,7 +22,18 @@ jobs:
               git clone https://github.com/mcoradog5-ctrl/proyecto-devops.git
             fi
             cd proyecto-devops
-            git pull origin main
-            # Apaga los contenedores viejos y levanta la nueva arquitectura
-            docker compose down || true
-            docker compose up -d --build
+            
+            # 1. Forzamos a Git a traer lo de GitHub limpiando cualquier ganchito local
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # 2. Detectamos si tu AWS usa 'docker compose' (nuevo) o 'docker-compose' (viejo)
+            if docker compose version >/dev/null 2>&1; then
+              echo "Usando Docker Compose V2"
+              docker compose down || true
+              docker compose up -d --build
+            else
+              echo "Usando Docker-Compose V1"
+              docker-compose down || true
+              docker-compose up -d --build
+            fi
