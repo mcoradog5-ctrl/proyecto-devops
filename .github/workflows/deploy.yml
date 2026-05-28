@@ -32,18 +32,25 @@ jobs:
             # Inicializar Swarm si no está activo
             docker info | grep -q "Swarm: active" || docker swarm init
 
-            # Liberar puerto 80
-            docker ps --filter "publish=80" -q | xargs -r docker stop || true
-            docker ps -a --filter "publish=80" -q | xargs -r docker rm  || true
-
             # Construir imagen antes del deploy
             docker build -t proyecto-devops-api-service:latest .
 
-            # Limpiar stack anterior si existe
-            docker stack rm proyecto-devops || true
-            sleep 10
+            # Bajar contenedores viejos de Docker Compose
+            docker compose down --remove-orphans || true
+            docker-compose down --remove-orphans || true
 
-            # Limpiar red huérfana si existe
+            # Limpiar stack de Swarm si existe
+            docker stack rm proyecto-devops || true
+            sleep 15
+
+            # Forzar desconexión de contenedores de la red
+            docker network disconnect -f proyecto-devops_umg-vnet grafana-dashboard || true
+            docker network disconnect -f proyecto-devops_umg-vnet database-mongo || true
+            docker network disconnect -f proyecto-devops_umg-vnet api-app || true
+            docker network disconnect -f proyecto-devops_umg-vnet nginx-lb || true
+            sleep 5
+
+            # Eliminar la red
             docker network rm proyecto-devops_umg-vnet || true
             sleep 5
 
