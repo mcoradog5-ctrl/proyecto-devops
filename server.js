@@ -83,7 +83,6 @@ app.get('/', (req, res) => {
                     border-bottom: 1px solid rgba(255,255,255,0.05);
                 }
                 .service-row:last-child { border-bottom: none; }
-                .service-name { font-size: 15px; }
                 .service-detail { font-size: 13px; color: #a0aec0; }
                 .dot {
                     width: 10px; height: 10px;
@@ -174,7 +173,7 @@ app.get('/', (req, res) => {
                     </div>
                     <div class="service-row">
                         <span><span class="dot"></span>Grafana</span>
-                        <span class="service-detail">Monitoreo · <a href="http://${os.hostname()}:3000" style="color:#63b3ed;">Puerto 3000</a></span>
+                        <span class="service-detail">Monitoreo · <a href="http://18.118.136.12:3000" target="_blank" style="color:#63b3ed;">Puerto 3000</a></span>
                     </div>
                 </div>
 
