@@ -39,6 +39,14 @@ jobs:
             # Construir imagen antes del deploy
             docker build -t proyecto-devops-api-service:latest .
 
-            # Desplegar o actualizar el stack con Swarm
+            # Limpiar stack anterior si existe
+            docker stack rm proyecto-devops || true
+            sleep 10
+
+            # Limpiar red huérfana si existe
+            docker network rm proyecto-devops_umg-vnet || true
+            sleep 5
+
+            # Desplegar con Swarm
             docker stack deploy -c docker-compose.yml proyecto-devops
     
